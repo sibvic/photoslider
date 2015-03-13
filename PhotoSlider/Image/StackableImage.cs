@@ -27,8 +27,8 @@ namespace PhotoSlider
 {
     public class StackableImage : ImageDescriptor, IRowItem
     {
-        public StackableImage(string filePath, Image original, Image scaled)
-            : base(filePath, original, scaled)
+        public StackableImage(string filePath, PhotoSlider.Image.SliderImage image)
+            : base(filePath, image)
         {
         }
 
@@ -39,12 +39,12 @@ namespace PhotoSlider
 
         public int Width
         {
-            get { throw new NotImplementedException(); }
+            get { return mImage.Width; }
         }
 
         public int Height
         {
-            get { throw new NotImplementedException(); }
+            get { return mImage.Height; }
         }
     }
 }

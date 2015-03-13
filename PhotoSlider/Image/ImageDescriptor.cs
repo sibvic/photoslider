@@ -30,22 +30,25 @@ namespace PhotoSlider
     /// </summary>
     public class ImageDescriptor : IDisposable
     {
-        public ImageDescriptor(string fileName, Image original, Image scaled)
+        public ImageDescriptor(string fileName, PhotoSlider.Image.SliderImage image)
         {
             Path = fileName;
-            Original = original;
-            Scaled = scaled;
+            mImage = image;
         }
+        protected PhotoSlider.Image.SliderImage mImage;
 
         public string Path { get; private set; }
-        public Image Original { get; private set; }
-        public Image Scaled { get; private set; }
+        public System.Drawing.Image Image
+        {
+            get
+            {
+                return mImage.GetImage();
+            }
+        }
         
         public void Dispose()
         {
-            Original.Dispose();
-            if (Original != Scaled)
-                Scaled.Dispose();
+            mImage.Dispose();
         }
     }
 }

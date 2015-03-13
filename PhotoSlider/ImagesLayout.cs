@@ -59,7 +59,6 @@ namespace PhotoSlider
 
         bool addSubitem(ImagesRow r, StackableImage image, int maxHeight)
         {
-            Image img = image.Scaled;
             for (int i = 0; i < r.Count; ++i)
             {
                 if (r[i].GetItemType() == RowType.Rows)
@@ -70,14 +69,13 @@ namespace PhotoSlider
                 else
                 {
                     StackableImage desc = r[i] as StackableImage;
-                    Image defaultImg = desc.Scaled;
-                    if (r.Height - defaultImg.Height < img.Height || defaultImg.Width < img.Width)
+                    if (r.Height - desc.Height < image.Height || desc.Width < image.Width)
                         continue;
                     if (desc != null)
                     {
                         ImagesRows subrows = new ImagesRows();
-                        Add(subrows, desc, defaultImg.Width, maxHeight, false, true);
-                        Add(subrows, image, defaultImg.Width, maxHeight, false, true);
+                        Add(subrows, desc, desc.Width, maxHeight, false, true);
+                        Add(subrows, image, desc.Width, maxHeight, false, true);
                         r.Insert(subrows, i);
                         r.Remove(desc);
                         return true;
@@ -89,8 +87,7 @@ namespace PhotoSlider
 
         bool Add(ImagesRows target, StackableImage image, int maxWidth, int maxHeight, bool addSubRows, bool useFind)
         {
-            Image img = image.Scaled;
-            if (img == null || img.Width > maxWidth)
+            if (image.Width > maxWidth)
                 return false;
             int rowsHeight = 0;
             for (int row = 0; row < target.RowCount; ++row)
@@ -101,8 +98,8 @@ namespace PhotoSlider
                 int rowHeight = target[row].Height;
                 int rowWidth = target[row].Width;
                 rowsHeight += rowHeight;
-                int heightDiff = rowHeight - img.Height;
-                bool widthFits = maxWidth - rowWidth >= img.Width;
+                int heightDiff = rowHeight - image.Height;
+                bool widthFits = maxWidth - rowWidth >= image.Width;
                 bool heightFits = heightDiff >= 0 || maxHeight - GetRowsHeight() >= Math.Abs(heightDiff);
                 if (heightFits && widthFits)
                 {
@@ -111,7 +108,7 @@ namespace PhotoSlider
                     return true;
                 }
             }
-            if (maxHeight - rowsHeight >= img.Height)
+            if (maxHeight - rowsHeight >= image.Height)
             {
                 ImagesRow newRow = new ImagesRow();
                 newRow.Add(image);

@@ -55,29 +55,7 @@ namespace PhotoSlider
             return null;
         }
 
-        void pictureBox_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button != System.Windows.Forms.MouseButtons.Left)
-                return;
-
-            PictureBox pictureBox = (sender as PictureBox);
-            PictureControlDesc desc = findDescription(pictureBox);
-            if (desc != null && desc.mImageDescriptor != null)
-            {
-                pictureBox.Left = mLastLeft;
-                pictureBox.Top = mLastTop;
-                pictureBox.Width = mLastWidth;
-                pictureBox.Height = mLastHeight;
-                pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-                pictureBox.Image = desc.mImageDescriptor.Scaled;
-            }
-        }
-
         PictureBox mLastMenuPictureBox = null;
-        int mLastLeft;
-        int mLastTop;
-        int mLastWidth;
-        int mLastHeight;
         void pictureBox_MouseDown(object sender, MouseEventArgs e)
         {
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
@@ -99,22 +77,6 @@ namespace PhotoSlider
             {
                 mLastMenuPictureBox = pictureBox;
                 return;
-            }
-            PictureControlDesc descriptor = mPictures.Find(delegate(PictureControlDesc d) { return d.mPictureBox == pictureBox; });
-            Image image = descriptor.mImageDescriptor.Original;
-            if (image != null)
-            {
-                pictureBox.Image = image;
-                mLastLeft = pictureBox.Left;
-                mLastTop = pictureBox.Top;
-                mLastWidth = pictureBox.Width;
-                mLastHeight = pictureBox.Height;
-                pictureBox.Left = 0;
-                pictureBox.Top = 0;
-                pictureBox.Width = Size.Width;
-                pictureBox.Height = Size.Height;
-                pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-                pictureBox.BringToFront();
             }
         }
 
@@ -158,7 +120,6 @@ namespace PhotoSlider
             pictureBox.BackColor = Color.Black;
             pictureBox.Visible = false;
             pictureBox.MouseDown += new MouseEventHandler(pictureBox_MouseDown);
-            pictureBox.MouseUp += new MouseEventHandler(pictureBox_MouseUp);
             pictureBox.ContextMenuStrip = contextMenuStrip1;
             this.Controls.Add(pictureBox);
             PictureControlDesc desc = new PictureControlDesc();
@@ -227,11 +188,10 @@ namespace PhotoSlider
                 if (item.GetItemType() == RowType.Image)
                 {
                     StackableImage image = item as StackableImage;
-                    Image img = image.Scaled;
                     mPictures[i].mPictureBox.Left = left;
                     mPictures[i].mPictureBox.Top = top;
                     mPictures[i].mPictureBox.Height = (int)Math.Round(rowHeight + vgap);
-                    mPictures[i].mPictureBox.Width = (int)Math.Round(img.Width + gap);
+                    mPictures[i].mPictureBox.Width = (int)Math.Round(image.Width + gap);
                     left = mPictures[i].mPictureBox.Left + mPictures[i].mPictureBox.Width;
 
                     showNextImage(mPictures[i], action, image);
@@ -261,7 +221,7 @@ namespace PhotoSlider
 
         void showNextImage(PictureControlDesc picture, ImageAction action, StackableImage next)
         {
-            Image img = next == null ? null : next.Scaled;
+            System.Drawing.Image img = next == null ? null : next.Image;
             if (picture.mPictureBox.Image != null)
                 picture.mPictureBox.Image.Dispose();
             if (img == null)
@@ -270,7 +230,7 @@ namespace PhotoSlider
             {
             	try
             	{
-                	picture.mPictureBox.Image = (Image)img.Clone();
+                    picture.mPictureBox.Image = (System.Drawing.Image)img.Clone();
             	}
             	catch (Exception ex)
             	{

@@ -38,13 +38,7 @@ namespace PhotoSlider
                 int width = 0;
                 foreach (IRowItem image in mImages)
                 {
-                    if (image.GetItemType() == RowType.Image)
-                    {
-                        System.Drawing.Image img = (image as StackableImage).Scaled;
-                        width += img.Width;
-                    }
-                    else
-                        width += image.Width;
+                    width += image.Width;
                 }
 
                 return width;
@@ -58,11 +52,7 @@ namespace PhotoSlider
                 int height = 0;
                 foreach (IRowItem image in mImages)
                 {
-                    int imageHeigh = 0;
-                    if (image.GetItemType() == RowType.Image)
-                        imageHeigh = (image as StackableImage).Scaled.Height;
-                    else
-                        imageHeigh = image.Height;
+                    int imageHeigh = image.Height;
                     if (height < imageHeigh)
                         height = imageHeigh;
                 }

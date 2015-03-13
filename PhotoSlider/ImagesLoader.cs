@@ -27,13 +27,12 @@ using System.Threading;
 
 namespace PhotoSlider
 {
-    class ImagesLoader : IDisposable
+    class ImagesLoaderJob : IDisposable
     {
-        public ImagesLoader(ImagesScaner imagesLoader, int width, int height)
+        public ImagesLoaderJob(ImagesScaner imagesScanner, int width, int height)
         {
-            mWidth = width;
-            mHeight = height;
-            mImagesLoader = imagesLoader;
+            mImageLoader = new ImageLoader(width, height);
+            mImagesScanner = imagesScanner;
             for (int i = 0; i < 2; ++i)
             {
                 var data = new Data();
@@ -44,6 +43,8 @@ namespace PhotoSlider
                 mPreloader.Add(preloader);
             }
         }
+        ImageLoader mImageLoader;
+        ImagesScaner mImagesScanner;
 
         /// <summary>
         /// Stops layout generation.
@@ -60,14 +61,6 @@ namespace PhotoSlider
             }
         }
 
-        readonly int mWidth;
-        public int ImagesWidth { get { return mWidth; } }
-
-        readonly int mHeight;
-        public int ImagesHeight { get { return mHeight; } }
-
-        readonly ImagesScaner mImagesLoader;
-        
         void preloaderWork(object queue)
         {
             Data data = (Data)queue;
@@ -77,28 +70,6 @@ namespace PhotoSlider
                 data.mImagesLoadedEvent.WaitOne();
             }
             data.IsDone = true;
-        }
-
-        Image loadImage(string path)
-        {
-            try
-            {
-                Image original = Image.FromFile(path);
-                return original;
-            }
-            catch (System.IO.PathTooLongException)
-            {
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-            }
-            catch (System.Runtime.InteropServices.ExternalException)
-            {
-            }
-            catch (System.ArgumentException)
-            {
-            }
-            return null;
         }
 
         /// <summary>
@@ -112,51 +83,22 @@ namespace PhotoSlider
             {
                 if (data.Cancelled)
                     return false;
-                string path = mImagesLoader.Next();
+                string path = mImagesScanner.Next();
                 if (path == null)
                     return false;
+                PhotoSlider.Image.SliderImage img = null;
                 try
                 {
-                    Image original = null;
-                    Image scaled = null;
-                    try
-                    {
-                        original = loadImage(path);
-                        if (original == null)
-                        {
-                            mImagesLoader.Return(path);
-                            break;
-                        }
-                        try
-                        {
-                            if (original.Width <= mWidth && original.Height <= mHeight)
-                                scaled = original;
-                            else
-                                scaled = ImageScaler.ScaleImage(mWidth, mHeight, original);
-                        }
-                        catch (ArgumentException)
-                        {
-                        }
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        if (original != null)
-                            original.Dispose();
-                        mImagesLoader.Return(path);
-                        break;
-                    }
-                    if (scaled == null)
-                    {
-                        original.Dispose();
-                        continue;
-                    }
-                    data.AddImage(new StackableImage(path, original, scaled));
+                    img = mImageLoader.Load(path);
                 }
-                catch (System.OutOfMemoryException)
+                catch (OutOfMemoryException)
                 {
-                    mImagesLoader.Return(path);
+                    if (img != null)
+                        img.Dispose();
+                    mImagesScanner.Return(path);
                     break;
                 }
+                data.AddImage(new StackableImage(path, img));
             }
             while (true);
             return true;
@@ -243,5 +185,6 @@ namespace PhotoSlider
             foreach (Thread thread in mPreloader)
                 thread.Abort();
         }
+
     }
 }

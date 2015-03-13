@@ -29,13 +29,13 @@ namespace PhotoSlider
     {
         public ScreenComposer(ImagesScaner imageScaner, System.Drawing.Size layoutSize, System.Drawing.Size imagesSize)
         {
-            mImages = new ImagesLoader(imageScaner, imagesSize.Width, imagesSize.Height);
+            mImages = new ImagesLoaderJob(imageScaner, imagesSize.Width, imagesSize.Height);
             mLayoutSize = layoutSize;
             mImagesScaner = imageScaner;
             mThread = new Thread(new ThreadStart(doWork));
             mThread.Start();
         }
-        ImagesLoader mImages;
+        ImagesLoaderJob mImages;
         Thread mThread;
         bool mWorkDone = false;
         bool mCanceled = false;
