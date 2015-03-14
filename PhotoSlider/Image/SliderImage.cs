@@ -66,7 +66,10 @@ namespace PhotoSlider.Image
                     return mImage;
                 }
                 else
+                {
                     mImage = original;
+                    return mImage;
+                }
             }
             catch (System.IO.PathTooLongException)
             {

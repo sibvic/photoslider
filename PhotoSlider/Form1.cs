@@ -230,6 +230,7 @@ namespace PhotoSlider
             {
             	try
             	{
+                    //TODO: optimize
                     picture.mPictureBox.Image = (System.Drawing.Image)img.Clone();
             	}
             	catch (Exception ex)
