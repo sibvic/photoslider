@@ -33,22 +33,22 @@ namespace PhotoSlider
     {
         public ImagesScaner()
         {
-            mScanner = new Thread(new ParameterizedThreadStart(scannFolder));
+            mScanner = new Thread(new ParameterizedThreadStart(scanFolderJob));
             mScanner.Start(System.IO.Directory.GetCurrentDirectory());
         }
 
-        void scannFolder(object path)
+        void scanFolder(string path)
         {
             try
             {
-                foreach (string folder in System.IO.Directory.GetDirectories((string)path))
+                foreach (string folder in System.IO.Directory.GetDirectories(path))
                 {
-                    scannFolder(folder);
+                    scanFolder(folder);
                 }
                 string[] extensions = new string[] { "*.jpg", "*.jpe", "*.png", "*.gif", "*.bmp" };
                 foreach (string extension in extensions)
                 {
-                    foreach (string file in System.IO.Directory.GetFiles((string)path, extension))
+                    foreach (string file in System.IO.Directory.GetFiles(path, extension))
                     {
                         mImages.Enqueue(file);
                         mEvent.Set();
@@ -58,6 +58,11 @@ namespace PhotoSlider
             catch (System.IO.PathTooLongException)
             {
             }
+        }
+
+        void scanFolderJob(object path)
+        {
+            scanFolder((string)path);
             mScanned = true;
         }
 
